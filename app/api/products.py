@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from ..services.auth_service import verify_token
-from ..services.woocommerce_service import get_all_products, create_product
+from ..services.woocommerce_service import get_all_products, create_product, get_last_sku_consecutive
 from ..models.product import Product
 from typing import List
 
@@ -24,3 +24,7 @@ def add_product(product: Product, user=Depends(verify_token)):
         "description": product.description,
     }
     return create_product(wc_product)
+
+@router.get("/products/next-sku")
+def get_next_numeric_sku(user=Depends(verify_token)):
+    return get_last_sku_consecutive()

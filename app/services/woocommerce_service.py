@@ -1,4 +1,5 @@
 from woocommerce import API
+from typing import List, Dict, Any
 from app.configs import Config
 
 
@@ -40,9 +41,39 @@ def delete_product(product_id: int):
     response = wcapi.delete(f"products/{product_id}", params={"force": True})
     return response.json()
 
+def get_last_sku_consecutive():
+    page = 1
+    per_page = 100
+    max_sku_number = 0
+
+    while True:
+        response = wcapi.get("products", params={"page": page, "per_page": per_page})
+        products = response.json()
+
+        if not products:
+            break
+
+        for product in products:
+            sku = product.get("sku")
+            if sku and sku.isdigit():
+                sku_num = int(sku)
+                if sku_num > max_sku_number:
+                    max_sku_number = sku_num
+
+        if len(products) < per_page:
+            break
+        page += 1
+
+    next_sku = str(max_sku_number + 1)
+
+    return {
+        "last_sku": str(max_sku_number),
+        "next_sku": next_sku
+    }
+
 # ------------------- Categorías -------------------
 
-def get_all_categories(page: int = 1, per_page: int = 10):
+def get_all_categories_paginated(page: int = 1, per_page: int = 10):
     params = {
         "page": page,
         "per_page": per_page
@@ -57,6 +88,24 @@ def get_all_categories(page: int = 1, per_page: int = 10):
             "per_page": per_page
         }
     }
+
+def get_categories() -> List[Dict[str, Any]]:
+    response = wcapi.get("products/categories", params={"per_page": 100})
+    response.raise_for_status()
+    return response.json()
+
+def build_category_tree(categories: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    category_map = {cat["id"]: {**cat, "children": []} for cat in categories}
+    tree = []
+
+    for cat in categories:
+        parent_id = cat["parent"]
+        if parent_id and parent_id in category_map:
+            category_map[parent_id]["children"].append(category_map[cat["id"]])
+        else:
+            tree.append(category_map[cat["id"]])
+    
+    return tree
 
 def create_category(category_data: dict):
     return wcapi.post("products/categories", data=category_data).json()
