@@ -107,6 +107,23 @@ def build_category_tree(categories: List[Dict[str, Any]]) -> List[Dict[str, Any]
     
     return tree
 
+def flatten_category_tree(tree: List[Dict[str, Any]], depth: int = 0) -> List[Dict[str, Any]]:
+    flattened = []
+    prefix = "— " * depth
+
+    for category in tree:
+        flattened.append({
+            "label": f"{prefix}{category['name']}",
+            "value": category["slug"],
+            "id": category["id"],
+            "slug": category["slug"],
+            "parent": category["parent"]
+        })
+        if category.get("children"):
+            flattened.extend(flatten_category_tree(category["children"], depth + 1))
+    
+    return flattened
+
 def create_category(category_data: dict):
     return wcapi.post("products/categories", data=category_data).json()
 

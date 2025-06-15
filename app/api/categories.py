@@ -7,7 +7,8 @@ from ..services.woocommerce_service import (
     update_category,
     delete_category,
     get_categories,
-    build_category_tree
+    build_category_tree,
+    flatten_category_tree
 )
 
 router = APIRouter()
@@ -19,7 +20,7 @@ def list_categories_paginated(
     user=Depends(verify_token)):
     return get_all_categories_paginated(page=page, per_page=limit)
 
-@router.get("/categories-tree", response_model=List[Dict[str, Any]])
+@router.get("/categories/tree", response_model=List[Dict[str, Any]])
 def list_categories(user=Depends(verify_token)):
     """
     Devuelve las categorías jerárquicamente organizadas desde WooCommerce.
@@ -27,6 +28,16 @@ def list_categories(user=Depends(verify_token)):
     categories = get_categories()
     tree = build_category_tree(categories)
     return tree
+
+@router.get("/categories/flat", response_model=List[Dict[str, Any]])
+def list_flat_categories(user=Depends(verify_token)):
+    """
+    Devuelve las categorías aplanadas con indentación visual.
+    """
+    categories = get_categories()
+    tree = build_category_tree(categories)
+    return flatten_category_tree(tree)
+
 
 @router.post("/categories")
 def add_category(category: dict, user=Depends(verify_token)):
