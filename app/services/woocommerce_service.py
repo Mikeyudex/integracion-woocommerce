@@ -90,9 +90,25 @@ def get_all_categories_paginated(page: int = 1, per_page: int = 10):
     }
 
 def get_categories() -> List[Dict[str, Any]]:
-    response = wcapi.get("products/categories", params={"per_page": 100})
-    response.raise_for_status()
-    return response.json()
+    all_categories = []
+    page = 1
+
+    while True:
+        response = wcapi.get("products/categories", params={
+            "per_page": 100,
+            "page": page,
+            "hide_empty": False  # incluir categorías vacías también
+        })
+        response.raise_for_status()
+
+        data = response.json()
+        if not data:
+            break
+
+        all_categories.extend(data)
+        page += 1
+
+    return all_categories
 
 def build_category_tree(categories: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     category_map = {cat["id"]: {**cat, "children": []} for cat in categories}
