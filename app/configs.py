@@ -14,6 +14,8 @@ class Config:
     WC_URL = os.getenv("WC_URL", "")
     WC_KEY = os.getenv("WC_KEY", "")
     WC_SECRET = os.getenv("WC_SECRET", "")
+    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+    MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "myapp")
     
     @staticmethod
     def get_config(key):

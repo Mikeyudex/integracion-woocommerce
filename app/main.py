@@ -4,6 +4,7 @@ from .api.products import router as products_router
 from .api.categories import router as categories_router
 from .api.stock import router as stock_router
 from .api.login import router as login_router
+from .routers.users import router as users_router
 
 app = FastAPI()
 
@@ -29,3 +30,4 @@ app.include_router(login_router, prefix="/api")
 app.include_router(products_router, prefix="/api")
 app.include_router(categories_router, prefix="/api")
 app.include_router(stock_router, prefix="/api")
+app.include_router(users_router)
