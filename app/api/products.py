@@ -16,14 +16,8 @@ def fetch_products(
 
 @router.post("/products")
 def add_product(product: Product, user=Depends(verify_token)):
-    # Transforma Product (Pydantic) a dict que WooCommerce acepta
-    wc_product = {
-        "name": product.name,
-        "type": "simple",
-        "regular_price": str(product.price),
-        "description": product.description,
-    }
-    return create_product(wc_product)
+    product_data = product.model_dump()
+    return create_product(product_data)
 
 @router.get("/products/next-sku")
 def get_next_numeric_sku(user=Depends(verify_token)):

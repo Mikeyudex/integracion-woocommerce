@@ -27,7 +27,7 @@ async def login(credentials: UserLogin):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user_id": user["_id"]
+        "user": user
     }
 
 @router.post("/logout")

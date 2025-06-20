@@ -1,6 +1,7 @@
 from woocommerce import API
 from typing import List, Dict, Any
 from app.configs import Config
+from app.dao.sku_counter_dao import increment_sku_counter
 
 
 wcapi = API(
@@ -29,9 +30,13 @@ def get_all_products(page: int = 1, per_page: int = 10):
         }
     }
 
-def create_product(product_data: dict):
+async def create_product(product_data: dict):
     response = wcapi.post("products", data=product_data)
-    return response.json()
+    if response.get("id"):
+        await increment_sku_counter()
+        return response.json()
+    else:
+        return {"error": "Error al crear producto"}
 
 def update_product(product_id: int, product_data: dict):
     response = wcapi.put(f"products/{product_id}", data=product_data)
