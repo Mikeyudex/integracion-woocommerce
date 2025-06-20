@@ -3,9 +3,9 @@
 from pymongo.collection import Collection
 from ..config.db import get_sku_counter_collection
 
-def get_current_sku() -> int:
+async def get_current_sku() -> int:
     collection: Collection = get_sku_counter_collection()
-    doc = collection.find_one({"_id": "sku"})
+    doc = await collection.find_one({"_id": "sku"})
     if doc and "seq" in doc:
         return doc["seq"]
     return 19999  # valor inicial - 1

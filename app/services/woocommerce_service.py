@@ -31,12 +31,31 @@ def get_all_products(page: int = 1, per_page: int = 10):
     }
 
 async def create_product(product_data: dict):
-    response = wcapi.post("products", data=product_data)
-    if response.get("id"):
-        await increment_sku_counter()
-        return response.json()
-    else:
-        return {"error": "Error al crear producto"}
+    try:
+        response = wcapi.post("products", data=product_data)
+        response_data = response.json()
+
+        # Manejar errores de la API de WooCommerce
+        if response.status_code >= 400:
+            return {
+                "error": response_data.get("message", "Error desconocido al crear producto"),
+                "code": response_data.get("code"),
+                "status": response.status_code,
+                "data": response_data.get("data")
+            }
+        # Validar creación correcta
+        if "id" in response_data:
+            await increment_sku_counter()
+            return response_data
+        else:
+            return {
+                "error": "Respuesta inesperada al crear producto",
+                "response": response_data
+            }
+
+    except Exception as e:
+        print("Excepción al crear producto:", e)
+        return {"error": "Error interno al crear producto", "detail": str(e)}
 
 def update_product(product_id: int, product_data: dict):
     response = wcapi.put(f"products/{product_id}", data=product_data)

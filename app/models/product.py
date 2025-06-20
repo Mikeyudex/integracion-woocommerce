@@ -1,8 +1,14 @@
 from pydantic import BaseModel
 
 class Product(BaseModel):
-    id: int
+    sku: str
     name: str
-    price: float
+    slug: str
+    price: str
     description: str
-    # Otros campos necesarios para WooCommerce
+    stock_quantity: int
+    categories: list[dict]
+    tags: list[dict]
+    images: list[dict]
+    manage_stock: bool
+    meta_data: list[dict]
