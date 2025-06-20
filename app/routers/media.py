@@ -1,17 +1,14 @@
 # app/routers/media.py
-from fastapi import APIRouter, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
+from app.services.auth_service import verify_token
 from app.services.media_service import upload_image_to_woocommerce
 
 router = APIRouter(prefix="/media", tags=["Media"])
 
 @router.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...), user=Depends(verify_token)):
     try:
-        file_bytes = await file.read()
-        result = upload_image_to_woocommerce(file_bytes, file.filename, file.content_type)
-        return result
+        result = upload_image_to_woocommerce(file)
+        return {"id": result["id"], "url": result["source_url"]}
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al subir imagen: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e))
