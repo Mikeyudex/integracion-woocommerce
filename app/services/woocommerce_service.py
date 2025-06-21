@@ -2,6 +2,7 @@ from woocommerce import API
 from typing import List, Dict, Any
 from app.configs import Config
 from app.dao.sku_counter_dao import increment_sku_counter
+from app.services.product_log_service import save_product_log
 
 
 wcapi = API(
@@ -30,9 +31,8 @@ def get_all_products(page: int = 1, per_page: int = 10):
         }
     }
 
-async def create_product(product_data: dict):
+async def create_product(product_data: dict, user_id: str):
     try:
-        print(product_data)
         response = wcapi.post("products", data=product_data)
         response_data = response.json()
 
@@ -47,6 +47,7 @@ async def create_product(product_data: dict):
         # Validar creación correcta
         if "id" in response_data:
             await increment_sku_counter()
+            await save_product_log(response_data["id"], user_id)
             return response_data
         else:
             return {

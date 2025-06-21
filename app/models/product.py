@@ -12,3 +12,4 @@ class Product(BaseModel):
     images: list[dict]
     manage_stock: bool
     meta_data: list[dict]
+    user_id: str = None

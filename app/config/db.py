@@ -15,3 +15,6 @@ def get_users_collection() -> Collection:
 
 def get_sku_counter_collection() -> Collection:
     return db["sku_counter"]
+
+def get_product_log_collection() -> Collection:
+    return db["product_log"]

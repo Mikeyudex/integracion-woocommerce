@@ -21,7 +21,7 @@ def fetch_products(
 async def add_product(product: Product, user=Depends(verify_token)):
     try:
         product_data = product.model_dump()
-        result = await create_product(product_data)
+        result = await create_product(product_data, product_data.get("user_id"))
         if "error" in result:
             return JSONResponse(
                 status_code=result.get("status", 400),
