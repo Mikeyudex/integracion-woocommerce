@@ -4,7 +4,7 @@ class Product(BaseModel):
     sku: str
     name: str
     slug: str
-    price: str
+    regular_price: str
     description: str
     stock_quantity: int
     categories: list[dict]

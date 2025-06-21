@@ -32,6 +32,7 @@ def get_all_products(page: int = 1, per_page: int = 10):
 
 async def create_product(product_data: dict):
     try:
+        print(product_data)
         response = wcapi.post("products", data=product_data)
         response_data = response.json()
 

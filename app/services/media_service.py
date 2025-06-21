@@ -1,25 +1,40 @@
-import requests
 import base64
+import httpx
 from fastapi import UploadFile
 from app.configs import Config
 
-def upload_image_to_woocommerce(file: UploadFile) -> dict:
-    url = f"{Config.WC_URL}/wp-json/wp/v2/media"
 
-    auth_str = f"{Config.WC_KEY}:{Config.WC_SECRET}"
-    b64_auth = base64.b64encode(auth_str.encode()).decode()
 
-    headers = {
-        "Authorization": f"Basic {b64_auth}",
-        "Content-Disposition": f"attachment; filename={file.filename}",
-        "Content-Type": file.content_type or "image/jpeg",
-    }
+async def upload_image_to_woocommerce(file: UploadFile) -> dict:
+    try:
+        url = f"{Config.WC_URL}/wp-json/wp/v2/media"
 
-    file_bytes = file.file.read()
+        # Generar header de autenticación básica
+        auth_header = base64.b64encode(
+            f"{Config.WORDPRESS_USERNAME}:{Config.WORDPRESS_APP_PASSWORD}".encode()
+        ).decode()
 
-    response = requests.post(url, headers=headers, data=file_bytes)
+        headers = {
+            "Authorization": f"Basic {auth_header}"
+        }
 
-    if response.status_code in [200, 201]:
-        return response.json()  # contiene el id, url, etc.
-    else:
-        raise Exception(f"Error al subir la imagen: {response.text}")
+        file_bytes = file.file.read()
+
+        async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url,
+                    headers={
+                        **headers,
+                        "Content-Disposition": f'attachment; filename="{file.filename}"',
+                        "Content-Type": file.content_type
+                    },
+                    content=file_bytes
+                )
+
+
+        if response.status_code == 201:
+                return response.json()
+        else:
+            raise Exception(f"Error al subir la imagen: {response.json()}")
+    except Exception as e:
+        raise Exception(f"Error al subir la imagen: {e}")

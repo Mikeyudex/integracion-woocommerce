@@ -16,6 +16,8 @@ class Config:
     WC_SECRET = os.getenv("WC_SECRET", "")
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
     MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "myapp")
+    WORDPRESS_USERNAME = os.getenv("WORDPRESS_USERNAME", "")
+    WORDPRESS_APP_PASSWORD = os.getenv("WORDPRESS_APP_PASSWORD", "")
     
     @staticmethod
     def get_config(key):
