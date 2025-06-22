@@ -59,6 +59,13 @@ async def create_product(product_data: dict, user_id: str):
         print("Excepción al crear producto:", e)
         return {"error": "Error interno al crear producto", "detail": str(e)}
 
+async def get_product_by_id(product_id: int):
+    response = wcapi.get(f"products/{product_id}")
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    return response.json()
+
 def update_product(product_id: int, product_data: dict):
     response = wcapi.put(f"products/{product_id}", data=product_data)
     return response.json()
