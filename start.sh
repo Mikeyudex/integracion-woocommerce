@@ -10,7 +10,7 @@ cd $PROJECT_DIR
 PORT=8000
 
 # Activar entorno virtual
-source venv/bin/activate
+#source venv/bin/activate
 
 # Cargar variables de entorno desde .env
 if [ -f .env ]; then

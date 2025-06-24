@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Instalar gcc u otras dependencias necesarias
-RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y bash gcc && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements e instalar dependencias
 COPY requirements.txt .
@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar todo el código
 COPY . .
 
-# Dar permisos de ejecución al script de arranque
-RUN chmod +x ./start.sh
+COPY start.sh .
+RUN chmod +x start.sh
 
 # Usuario no root opcional (si ya lo tienes configurado)
 # RUN adduser --disabled-password --gecos '' appuser
