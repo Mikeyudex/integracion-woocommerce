@@ -1,7 +1,7 @@
 from bson import ObjectId
-from ..config.db import get_users_collection
-from ..models.user import UserIn
-from ..utils.auth import hash_password
+from app.config.db import get_users_collection
+from app.models.user import UserIn
+from app.utils.auth import hash_password
 
 async def create_user(user: UserIn) -> dict:
     user_data = user.dict()

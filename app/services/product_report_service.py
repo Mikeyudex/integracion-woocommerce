@@ -1,6 +1,6 @@
 from collections import defaultdict
 from typing import  Optional
-from ..dao.product_log_dao import get_logs_filtered_paginated
+from app.dao.product_log_dao import get_logs_filtered_paginated
 from app.services.woocommerce_service import get_product_by_id 
 from app.dao.users_dao import get_user_by_id
 

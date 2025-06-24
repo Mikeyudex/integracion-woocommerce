@@ -1,5 +1,5 @@
 from pymongo.collection import Collection
-from ..config.db import get_sku_counter_collection
+from app.config.db import get_sku_counter_collection
 
 async def get_current_sku() -> int:
     collection: Collection = get_sku_counter_collection()

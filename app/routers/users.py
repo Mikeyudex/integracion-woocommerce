@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, status
-from ..models.user import UserIn, UserOut, UserLogin
-from ..dao.users_dao import (
+from app.models.user import UserIn, UserOut, UserLogin
+from app.dao.users_dao import (
     create_user, get_user_by_email, list_users,
     get_user_by_id, delete_user, update_user
 )
-from ..utils.auth import verify_password
-from ..services.auth_service import create_access_token
+from app.utils.auth import verify_password
+from app.services.auth_service import create_access_token
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

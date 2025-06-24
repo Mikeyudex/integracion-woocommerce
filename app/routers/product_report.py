@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from typing import Optional
-from ..services.product_report_service import get_product_creation_report
-from ..models.product_report import ReportResponse
+from app.services.product_report_service import get_product_creation_report
+from app.models.product_report import ReportResponse
 
 router = APIRouter(prefix="/reports", tags=["product-reports"])
 

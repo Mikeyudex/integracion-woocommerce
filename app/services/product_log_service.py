@@ -1,4 +1,4 @@
-from ..dao.product_log_dao import log_product_creation, get_products_created_by_user
+from app.dao.product_log_dao import log_product_creation, get_products_created_by_user
 from datetime import datetime
 from typing import Optional
 

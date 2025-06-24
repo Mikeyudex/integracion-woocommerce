@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
-from ..services.product_log_service import get_user_product_report
-from ..models.product_log import ProductLogOut
+from app.services.product_log_service import get_user_product_report
+from app.models.product_log import ProductLogOut
 from app.services.auth_service import verify_token
 
 router = APIRouter(prefix="/logs", tags=["product-logs"])

@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .api.products import router as products_router
-from .api.categories import router as categories_router
-from .api.stock import router as stock_router
-from .api.login import router as login_router
-from .routers.users import router as users_router
-from .routers.sku import router as sku_routes
-from .routers.media import router as media_router
-from .routers.product_report import router as product_report_router
+from app.api.products import router as products_router
+from app.api.categories import router as categories_router
+from app.api.stock import router as stock_router
+from app.api.login import router as login_router
+from app.routers.users import router as users_router
+from app.routers.sku import router as sku_routes
+from app.routers.media import router as media_router
+from app.routers.product_report import router as product_report_router
 
 
 app = FastAPI()

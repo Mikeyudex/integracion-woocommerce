@@ -25,5 +25,7 @@ USER appuser
 # Exponer el puerto
 EXPOSE 8000
 
+ENV PYTHONPATH=/app
+
 # Comando para ejecutar la aplicación
-CMD ["uvicorn", "app.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
