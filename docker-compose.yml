@@ -9,8 +9,8 @@ services:
     environment:
       - ENVIRONMENT=production
       - LOG_LEVEL=info
-    volumes:
-      - ./app:/app  # Para desarrollo con hot-reload
+    #volumes:
+    #  - ./app:/app  # Para desarrollo con hot-reload
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
