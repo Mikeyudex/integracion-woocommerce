@@ -1,31 +1,27 @@
-# Usar imagen oficial de Python
 FROM python:3.10-slim
 
-# Establecer directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Instalar gcc u otras dependencias necesarias
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements y instalar dependencias Python
+# Copiar requirements e instalar dependencias
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el código de la aplicación
+# Copiar todo el código
 COPY . .
 
-# Crear usuario no-root para seguridad
-RUN adduser --disabled-password --gecos '' appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+# Dar permisos de ejecución al script de arranque
+RUN chmod +x ./start.sh
 
-# Exponer el puerto
+# Usuario no root opcional (si ya lo tienes configurado)
+# RUN adduser --disabled-password --gecos '' appuser
+# RUN chown -R appuser:appuser /app
+# USER appuser
+
 EXPOSE 8000
 
-ENV PYTHONPATH=/app
-
-# Comando para ejecutar la aplicación
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Ejecutar el script de arranque
+CMD ["./start.sh"]

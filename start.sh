@@ -4,10 +4,10 @@
 set -e
 
 # Directorio del proyecto
-PROJECT_DIR="/home/ubuntu/integracion-woocommerce"
+PROJECT_DIR="/app"
 cd $PROJECT_DIR
 
-PORT=8003
+PORT=8000
 
 # Activar entorno virtual
 source venv/bin/activate
