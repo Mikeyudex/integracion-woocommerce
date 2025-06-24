@@ -26,6 +26,7 @@ venv/
 # FastAPI/uvicorn logs or temporary files
 *.log
 .env
+/logs
 
 # If you're using VS Code
 .vscode/
