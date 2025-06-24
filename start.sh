@@ -12,9 +12,11 @@ PORT=8002
 # Activar entorno virtual
 source venv/bin/activate
 
-# Cargar variables de entorno
+# Cargar variables de entorno desde .env
 if [ -f .env ]; then
-    export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
+    set -a  # exporta todas las variables definidas
+    source .env
+    set +a
 fi
 
 # Crear directorio de logs si no existe
