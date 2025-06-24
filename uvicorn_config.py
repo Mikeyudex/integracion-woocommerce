@@ -4,7 +4,7 @@ import multiprocessing
 
 # Configuración del servidor
 HOST = "0.0.0.0"
-PORT = 8000
+PORT = 8003
 WORKERS = multiprocessing.cpu_count()
 
 # Configuración de rendimiento
