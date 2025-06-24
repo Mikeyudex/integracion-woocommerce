@@ -12,6 +12,8 @@ async def create_user(user: UserIn) -> dict:
 
 async def get_user_by_email(email: str) -> dict:
     user = await get_users_collection().find_one({"email": email})
+    if not user:
+        return None
     user_map = dict(user, _id=str(user["_id"]))
     return user_map
 
