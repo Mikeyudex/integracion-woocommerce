@@ -8,6 +8,29 @@ venv/
 env/
 
 
-#cache
+# Python-specific files
 __pycache__/
+/app/*.pyc
 *.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+# If you use Poetry
+.venv/
+
+# macOS specific files
+.DS_Store
+
+# FastAPI/uvicorn logs or temporary files
+*.log
+.env
+
+# If you're using VS Code
+.vscode/
+
+# Other common temporary files
+*~
+*.bak
+*.swp

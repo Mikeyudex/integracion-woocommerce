@@ -4,7 +4,7 @@ class Product(BaseModel):
     sku: str
     name: str
     slug: str
-    price: str
+    regular_price: str
     description: str
     stock_quantity: int
     categories: list[dict]
@@ -12,3 +12,4 @@ class Product(BaseModel):
     images: list[dict]
     manage_stock: bool
     meta_data: list[dict]
+    user_id: str = None

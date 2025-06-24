@@ -1,5 +1,3 @@
-# dao/sku_counter_dao.py
-
 from pymongo.collection import Collection
 from ..config.db import get_sku_counter_collection
 

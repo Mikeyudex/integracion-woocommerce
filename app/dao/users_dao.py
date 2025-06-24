@@ -17,6 +17,8 @@ async def get_user_by_email(email: str) -> dict:
 
 async def get_user_by_id(user_id: str) -> dict:
     user = await get_users_collection().find_one({"_id": ObjectId(user_id)})
+    if not user:
+        return None
     user_map = dict(user, _id=str(user["_id"]))
     return user_map
 
