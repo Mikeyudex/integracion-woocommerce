@@ -24,4 +24,4 @@ RUN chmod +x start.sh
 EXPOSE 8000
 
 # Ejecutar el script de arranque
-CMD ["./start.sh"]
+CMD ["/app/start.sh"]
