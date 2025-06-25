@@ -15,7 +15,7 @@ app = FastAPI()
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # En producción, especificar dominios permitidos
+    allow_origins=["http://localhost:3000", "https://erp.totalmotors.cl"],  # En producción, especificar dominios permitidos
     allow_credentials=True,  # Cambiar a True para MCP
     allow_methods=["GET", "POST", "OPTIONS", "HEAD", "PUT", "DELETE"],
     allow_headers=[
