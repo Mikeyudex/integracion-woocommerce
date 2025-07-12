@@ -35,3 +35,6 @@ venv/
 *~
 *.bak
 *.swp
+
+/tmp
+/__pycache__

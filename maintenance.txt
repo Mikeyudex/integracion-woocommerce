@@ -1,0 +1,5 @@
+
+
+#Borrar archivos temporales cada 30 minutos
+crontab -e
+*/30 * * * * find /root/integracion-woocommerce/tmp -type f -mmin +60 -delete

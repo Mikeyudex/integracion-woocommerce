@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.products import router as products_router
 from app.api.categories import router as categories_router
 from app.api.stock import router as stock_router
@@ -8,6 +9,7 @@ from app.routers.users import router as users_router
 from app.routers.sku import router as sku_routes
 from app.routers.media import router as media_router
 from app.routers.product_report import router as product_report_router
+
 
 
 app = FastAPI()
@@ -38,3 +40,5 @@ app.include_router(users_router)
 app.include_router(sku_routes)
 app.include_router(media_router)
 app.include_router(product_report_router)
+
+app.mount("/static/tmp", StaticFiles(directory="tmp"), name="static-tmp")
