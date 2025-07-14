@@ -2,8 +2,13 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Instalar gcc u otras dependencias necesarias
-RUN apt-get update && apt-get install -y bash gcc && rm -rf /var/lib/apt/lists/*
+# Instalar dependencias del sistema necesarias para OpenCV
+RUN apt-get update && apt-get install -y \
+    bash \
+    gcc \
+    libgl1 \
+    libglib2.0-0 \
+ && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements e instalar dependencias
 COPY requirements.txt .
