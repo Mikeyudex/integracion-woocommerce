@@ -9,10 +9,30 @@ from app.routers.users import router as users_router
 from app.routers.sku import router as sku_routes
 from app.routers.media import router as media_router
 from app.routers.product_report import router as product_report_router
+from contextlib import asynccontextmanager
+import gc
 
+# Importar función de limpieza
+from app.utils.handle_process_u2net import model_singleton, cleanup_model
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Pre-cargar el modelo
+    print("🚀 Iniciando aplicación...")
+    print("📦 Pre-cargando modelo U2Net...")
+    model_singleton.get_model()  # Esto carga el modelo una sola vez
+    print("✅ Modelo listo para usar")
+    
+    yield
+    
+    # Shutdown: Limpiar memoria
+    print("🧹 Limpiando recursos...")
+    cleanup_model()
+    gc.collect()
+    print("✅ Aplicación cerrada correctamente")
 
-app = FastAPI()
+# Crear app con lifecycle
+app = FastAPI(lifespan=lifespan)
 
 # CORS
 app.add_middleware(
