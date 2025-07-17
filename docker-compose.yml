@@ -16,11 +16,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Agregar un cron para reiniciar el contenedor a las 2 am cada día
-    command: ["sh", "-c", "crontab /etc/cron.d/cron-job && cron -f"]
-    volumes:
-      - ./cron-job:/etc/cron.d/cron-job
-
-volumes:
-  cron-job:
-    driver: local
