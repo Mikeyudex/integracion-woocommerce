@@ -38,3 +38,4 @@ venv/
 
 /tmp
 /__pycache__
+*.pth

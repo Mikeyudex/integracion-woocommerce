@@ -14,14 +14,13 @@ async def upload_image(file: UploadFile = File(...), user=Depends(verify_token))
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/remove_background/{type_process}")
+@router.post("/remove_background")
 async def remove_background(
-    type_process: str,
     file: UploadFile = File(...),
     user=Depends(verify_token)
 ):
     try:
-        result = handle_remove_background(file, type_process)
+        result = handle_remove_background(file)
         return {"id": result["id"], "url": result["source_url"]}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -4,6 +4,128 @@ from PIL import Image
 import os
 from app.utils.file_process import save_temp_file
 from fastapi import UploadFile, HTTPException
+from app.utils.handle_process_u2net import remove_background_u2net
+
+def advanced_edge_refinement(image_path, output_path, color_range='green'):
+    """
+    Método avanzado con múltiples técnicas de refinamiento de bordes
+    """
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Error: No se pudo cargar la imagen {image_path}")
+        return False
+    
+    # === PASO 1: DETECCIÓN DE COLOR MEJORADA ===
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    
+    # Múltiples espacios de color para mejor detección
+    if color_range == 'green':
+        # HSV
+        mask_hsv1 = cv2.inRange(hsv, np.array([35, 30, 30]), np.array([85, 255, 255]))
+        mask_hsv2 = cv2.inRange(hsv, np.array([25, 30, 30]), np.array([35, 255, 255]))
+        
+        # LAB (mejor para ciertos tonos de verde)
+        mask_lab = cv2.inRange(lab, np.array([0, 0, 0]), np.array([120, 120, 255]))
+        
+        # Combinar máscaras
+        mask_combined = cv2.bitwise_or(mask_hsv1, mask_hsv2)
+        
+    elif color_range == 'blue':
+        mask_hsv1 = cv2.inRange(hsv, np.array([100, 30, 30]), np.array([130, 255, 255]))
+        mask_hsv2 = cv2.inRange(hsv, np.array([90, 30, 30]), np.array([100, 255, 255]))
+        mask_combined = cv2.bitwise_or(mask_hsv1, mask_hsv2)
+    
+    # === PASO 2: REFINAMIENTO MULTI-ESCALA ===
+    # Crear múltiples versiones de la máscara con diferentes niveles de procesamiento
+    masks = []
+    
+    # Máscara conservadora (menos área)
+    mask_conservative = cv2.erode(mask_combined, np.ones((3, 3), np.uint8), iterations=1)
+    mask_conservative = cv2.morphologyEx(mask_conservative, cv2.MORPH_CLOSE, np.ones((2, 2), np.uint8))
+    masks.append(mask_conservative)
+    
+    # Máscara balanceada
+    mask_balanced = cv2.morphologyEx(mask_combined, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    mask_balanced = cv2.morphologyEx(mask_balanced, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    masks.append(mask_balanced)
+    
+    # Máscara agresiva (más área)
+    mask_aggressive = cv2.dilate(mask_combined, np.ones((2, 2), np.uint8), iterations=1)
+    mask_aggressive = cv2.morphologyEx(mask_aggressive, cv2.MORPH_CLOSE, np.ones((4, 4), np.uint8))
+    masks.append(mask_aggressive)
+    
+    # === PASO 3: DETECCIÓN DE BORDES INTELIGENTE ===
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Múltiples detectores de bordes
+    edges_canny = cv2.Canny(gray, 50, 150)
+    edges_sobel = cv2.Sobel(gray, cv2.CV_64F, 1, 1, ksize=3)
+    edges_sobel = np.uint8(np.absolute(edges_sobel))
+    
+    # Combinar detecciones de bordes
+    edges_combined = cv2.bitwise_or(edges_canny, edges_sobel)
+    
+    # === PASO 4: CREACIÓN DE MÁSCARA ADAPTATIVA ===
+    # Crear máscara base
+    mask_base = mask_balanced.copy()
+    
+    # Identificar zonas problemáticas (bordes)
+    mask_dilated = cv2.dilate(mask_base, np.ones((5, 5), np.uint8), iterations=1)
+    mask_eroded = cv2.erode(mask_base, np.ones((5, 5), np.uint8), iterations=1)
+    border_zone = cv2.subtract(mask_dilated, mask_eroded)
+    
+    # En zonas de borde, usar detección más precisa
+    edge_refined_mask = mask_base.copy()
+    
+    # Aplicar lógica adaptativa en zonas de borde
+    border_pixels = np.where(border_zone > 0)
+    for y, x in zip(border_pixels[0], border_pixels[1]):
+        # Analizar ventana local
+        y_start, y_end = max(0, y-2), min(image.shape[0], y+3)
+        x_start, x_end = max(0, x-2), min(image.shape[1], x+3)
+        
+        local_region = hsv[y_start:y_end, x_start:x_end]
+        
+        # Decisión basada en varianza local de color
+        if color_range == 'green':
+            green_pixels = np.sum((local_region[:,:,0] >= 35) & (local_region[:,:,0] <= 85) & 
+                                 (local_region[:,:,1] >= 30))
+            total_pixels = local_region.shape[0] * local_region.shape[1]
+            
+            if green_pixels / total_pixels > 0.6:
+                edge_refined_mask[y, x] = 255
+            else:
+                edge_refined_mask[y, x] = 0
+    
+    # === PASO 5: SUAVIZADO AVANZADO ===
+    # Convertir a float para procesamiento preciso
+    mask_float = edge_refined_mask.astype(np.float32) / 255.0
+    
+    # Aplicar múltiples pasadas de suavizado
+    mask_smooth = cv2.GaussianBlur(mask_float, (3, 3), 0.5)
+    mask_smooth = cv2.bilateralFilter(mask_smooth, 5, 10, 10)
+    
+    # === PASO 6: APLICACIÓN FINAL ===
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    white_background = np.ones_like(image_rgb) * 255
+    
+    # Invertir máscara y aplicar
+    mask_inv = 1.0 - mask_smooth
+    mask_3d = np.stack([mask_inv, mask_inv, mask_inv], axis=2)
+    
+    # Combinar con transición suave
+    result = image_rgb * mask_3d + white_background * (1 - mask_3d)
+    
+    # Post-procesamiento final
+    result = cv2.bilateralFilter(result.astype(np.uint8), 9, 75, 75)
+    
+    # Guardar
+    result_image = Image.fromarray(result)
+    result_image.save(output_path)
+    print(f"Imagen con bordes refinados guardada: {output_path}")
+    return True
+
 
 def remove_background_auto(image_path, output_path):
     try:
@@ -132,7 +254,8 @@ def main():
     if choice == '1':
         success = remove_background_auto(image_path, output_path)
     elif choice == '2':
-        success = remove_background_green_screen(image_path, output_path, 'green')
+        #success = remove_background_green_screen(image_path, output_path, 'green')
+        success = advanced_edge_refinement(image_path, output_path, 'green')
     elif choice == '3':
         success = remove_background_green_screen(image_path, output_path, 'blue')
     else:
@@ -145,17 +268,10 @@ def main():
     else:
         print("Error durante el procesamiento")
 
-def handle_remove_background(file: UploadFile, type_process: str): 
-    if type_process not in ["blue", "green", "auto"]:
-        raise HTTPException(status_code=400, detail="Invalid type of process")
-    
+def handle_remove_background(file: UploadFile): 
     input_path = save_temp_file(file)
     output_path = input_path.replace(".", "_processed.")
-
-    if type_process == "auto":
-        remove_background_auto(input_path, output_path)
-    else:
-        remove_background_green_screen(input_path, output_path, color_range=type_process)
+    remove_background_u2net(input_path, output_path)
     return {
         "id": os.path.basename(output_path),
         "source_url": f"/static/tmp/{os.path.basename(output_path)}"
