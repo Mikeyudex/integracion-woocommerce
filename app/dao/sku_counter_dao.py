@@ -22,3 +22,14 @@ async def increment_sku_counter() -> int:
 async def update_sku_sequence(new_sequence: int) -> None:
     collection = get_sku_counter_collection()
     await collection.update_one({"_id": "sku"}, {"$set": {"seq": new_sequence}})
+
+async def reserve_next_sku() -> int:
+    """Reserva atómicamente el siguiente SKU. Garantiza unicidad entre usuarios concurrentes."""
+    collection = get_sku_counter_collection()
+    result = await collection.find_one_and_update(
+        {"_id": "sku"},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True  # retorna el documento YA incrementado
+    )
+    return result["seq"]
