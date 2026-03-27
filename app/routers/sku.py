@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from app.dao.sku_counter_dao import get_current_sku, update_sku_sequence
 from app.services.auth_service import verify_token
+from app.services.woocommerce_service import reserve_sku
 
 router = APIRouter(prefix="/sku", tags=["SKU"])
 
@@ -9,6 +10,11 @@ async def get_next_sku(user=Depends(verify_token)):
     current_sku = await get_current_sku()
     next_sku = current_sku + 1
     return {"next_sku": next_sku}
+
+@router.get("/reserve")
+async def handle_reserve_sku(user=Depends(verify_token)):
+    sku = await reserve_sku()
+    return {"next_sku": sku}
 
 @router.put("/update-sequence/{new_sequence}")
 async def update_sequence(new_sequence: int, user=Depends(verify_token)):

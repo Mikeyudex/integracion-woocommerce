@@ -34,53 +34,33 @@ def get_all_products(page: int = 1, per_page: int = 10):
     }
 
 async def create_product(product_data: dict, user_id: str):
-    last_error = None
+    try:
+        response = wcapi.post("products", data=product_data)
+        response_data = response.json()
 
-    for attempt in range(MAX_SKU_RETRIES):
-        # Reservar SKU atómicamente antes de enviarlo
-        sku = await reserve_next_sku()
-        product_data["sku"] = str(sku)
+        # Manejar errores de la API de WooCommerce
+        if response.status_code >= 400:
+            return {
+                "error": response_data.get("message", "Error desconocido al crear producto"),
+                "code": response_data.get("code"),
+                "status": response.status_code,
+                "data": response_data.get("data")
+            }
+        
+        # Validar creación correcta
+        if "id" in response_data:
+            #await increment_sku_counter()
+            await save_product_log(response_data["id"], user_id)
+            return response_data
+        else:
+            return {
+                "error": "Respuesta inesperada al crear producto",
+                "response": response_data
+            }
 
-        try:
-            response = wcapi.post("products", data=product_data)
-            response_data = response.json()
-
-            # SKU duplicado en WooCommerce → reservar el siguiente y reintentar
-            if response.status_code == 400 and response_data.get("code") == "product_invalid_sku":
-                last_error = response_data
-                print(f"[Intento {attempt + 1}] SKU {sku} rechazado por WooCommerce, reintentando...")
-                continue  # reserve_next_sku() en la próxima iteración dará un SKU nuevo
-
-            # Cualquier otro error de WooCommerce → retornar inmediatamente
-            if response.status_code >= 400:
-                return {
-                    "error": response_data.get("message", "Error desconocido al crear producto"),
-                    "code": response_data.get("code"),
-                    "status": response.status_code,
-                    "data": response_data.get("data")
-                }
-            
-            # Validar creación correcta
-            if "id" in response_data:
-                #await increment_sku_counter()
-                await save_product_log(response_data["id"], user_id)
-                return response_data
-            else:
-                return {
-                    "error": "Respuesta inesperada al crear producto",
-                    "response": response_data
-                }
-
-        except Exception as e:
-            print("Excepción al crear producto:", e)
-            return {"error": "Error interno al crear producto", "detail": str(e)}
-    
-    # Se agotaron los reintentos
-    return {
-        "error": f"No se pudo crear el producto tras {MAX_SKU_RETRIES} intentos por SKU duplicado en WooCommerce.",
-        "code": "sku_retry_exhausted",
-        "last_woo_error": last_error
-    }
+    except Exception as e:
+        print("Excepción al crear producto:", e)
+        return {"error": "Error interno al crear producto", "detail": str(e)}
 
 async def get_product_by_id(product_id: int):
     response = wcapi.get(f"products/{product_id}")
@@ -126,6 +106,11 @@ def get_last_sku_consecutive():
         "last_sku": str(max_sku_number),
         "next_sku": next_sku
     }
+
+async def reserve_sku():
+    """Reserva atómicamente el siguiente SKU. Garantiza unicidad entre usuarios concurrentes."""
+    sku = await reserve_next_sku()
+    return sku
 
 # ------------------- Categorías -------------------
 
